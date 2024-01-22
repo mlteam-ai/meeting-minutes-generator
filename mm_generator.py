@@ -9,6 +9,7 @@ class MeetingMinutesGenerator:
         self.output_folder = "output/"
 
     def transcribe_audio(self, audio_file_path):
+        print("Getting the transcription for the audio...")
         # Create a directory to store the output files
         if not os.path.exists(self.output_folder):
             os.mkdir(self.output_folder)
@@ -36,6 +37,7 @@ class MeetingMinutesGenerator:
                 text += self.client.audio.transcriptions.create(model="whisper-1", file=chunk_file).text + " "
             j+=1
             start = end
+        print("Transcription is completed.")
         return text
     
     def meeting_minutes(self, transcription):
@@ -51,6 +53,7 @@ class MeetingMinutesGenerator:
         }
     
     def __abstract_summary_extraction(self, transcription):
+        print("Getting the summary from GPT...")
         response = self.client.chat.completions.create(
             model="gpt-4",
             temperature=0,
@@ -65,10 +68,12 @@ class MeetingMinutesGenerator:
                 }
             ]
         )
+        print("Got the summary from GPT.")
         return response.choices[0].message.content
     
 
     def __key_points_extraction(self, transcription):
+        print("Getting the key points from GPT...")
         response = self.client.chat.completions.create(
             model="gpt-4",
             temperature=0,
@@ -83,10 +88,12 @@ class MeetingMinutesGenerator:
                 }
             ]
         )
+        print("Got the key points from GPT.")
         return response.choices[0].message.content
 
 
     def __action_item_extraction(self, transcription):
+        print("Getting the action items from GPT...")
         response = self.client.chat.completions.create(
             model="gpt-4",
             temperature=0,
@@ -101,9 +108,11 @@ class MeetingMinutesGenerator:
                 }
             ]
         )
+        print("Got the action items from GPT.")
         return response.choices[0].message.content
     
     def __sentiment_analysis(self, transcription):
+        print("Getting the sentiment analysis from GPT...")
         response = self.client.chat.completions.create(
             model="gpt-4",
             temperature=0,
@@ -118,9 +127,11 @@ class MeetingMinutesGenerator:
                 }
             ]
         )
+        print("Got the sentiment analysis from GPT.")
         return response.choices[0].message.content    
     
     def save_as_docx(self, minutes, filename):
+        print("Saving as .docx file...")
         doc = Document()
         for key, value in minutes.items():
             # Replace underscores with spaces and capitalize each word for the heading
@@ -130,3 +141,4 @@ class MeetingMinutesGenerator:
             # Add a line break between sections
             doc.add_paragraph()
         doc.save(self.output_folder + filename)
+        print("Saved as .docx file")
